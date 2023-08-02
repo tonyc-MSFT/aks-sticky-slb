@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: netshoot
+  namespace: default
+  labels:
+    app: netshoot
+spec:
+  selector:
+    matchLabels:
+      name: netshoot
+  template:
+    metadata:
+      labels:
+        name: netshoot
+    spec:
+      hostNetwork: true
+      containers:
+      - name: netshoot
+        image: nicolaka/netshoot
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "tshark -i eth0 -f 'port 8080' -Y 'http contains \"YO\"' -T fields -e frame.time -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport -e ip.proto" ]
+        securityContext:
+          privileged: true        
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
